@@ -73,7 +73,7 @@ def get_opened_tabs_urls(window):
 
     return tab_urls
 
-def save_browser_windows_and_tabs(passphrase="test", file_path="urls.txt", urls=""):
+def save_browser_windows_and_tabs(passphrase="test", file_path="urls.txt", file_mode='w', urls=""):
     """
     Save browser windows and tabs URLs to a file.
 
@@ -82,7 +82,12 @@ def save_browser_windows_and_tabs(passphrase="test", file_path="urls.txt", urls=
         file_path (str): Path to the file where URLs will be saved (default is "urls.txt").
         urls (list): List of lists containing URLs of opened tabs in each window (default is an empty list).
     """
+
     file_string = ""
+    if file_mode == 'a' and os.path.exists(file_path):
+        decryptor = my_crypto.FileEncryptor(passphrase)
+        file_string = decryptor.decrypt_file_string(file_path)
+
     for urllist in urls:
         for url in urllist:
             file_string += url
@@ -118,12 +123,13 @@ if __name__ == "__main__":
         install_and_import(module)
 
     parser = argparse.ArgumentParser(description="Save URLs of opened browser windows and tabs.")
-    parser.add_argument("browser", choices=["chrome", "firefox", "edge"], default="chrome", nargs="?",
+    parser.add_argument("-b", "--browser", choices=["chrome", "firefox", "edge"], default="chrome", nargs="?",
                         help="Choose browser (chrome/firefox/edge, default: chrome)")
-    parser.add_argument("filename", default="urls.txt", nargs="?",
+    parser.add_argument("-f", "--filename", default="urls.txt", nargs="?",
                         help="Name of the file to save URLs, default: urls.txt")
-    parser.add_argument("passphrase", help="Passphrase for encryption and decryption")
-   
+    parser.add_argument("-m", "--filemode", choices=['w', 'a'], default='w', help="File Mode: w(Write)/a(Append)")
+    parser.add_argument("-p", "--passphrase", help="Passphrase for encryption and decryption")
+
     args = parser.parse_args()
 
     if args.browser == "chrome":
@@ -136,8 +142,9 @@ if __name__ == "__main__":
     passphrase = args.passphrase.encode()
 
     file_path = args.filename
+    file_mode = args.filemode
 
     browser_windows = get_opened_browser_windows(browser_name)
     urls = [get_opened_tabs_urls(window) for window in browser_windows]
 
-    save_browser_windows_and_tabs(passphrase, file_path, urls)
+    save_browser_windows_and_tabs(passphrase, file_path, file_mode, urls)

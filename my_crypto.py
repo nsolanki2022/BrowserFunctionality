@@ -71,6 +71,19 @@ class FileEncryptor:
         """
         decrypted_string = self.fernet.decrypt(text)
         return decrypted_string
+    
+    def decrypt_file_string(self, input_file_path):
+        """
+        Decrypts an encrypted file using the fernet encryption key.
+        Return the decrypted file string.
+
+        Args:
+            input_file_path (str): Path to the input encrypted file.
+        """
+        with open(input_file_path, 'rb') as input_file:
+            encrypted_data = input_file.read()
+            decrypted_data = self.fernet.decrypt(encrypted_data)
+        return decrypted_data.decode() # Returning string instead of Bytes
 
     def encrypt_file(self, input_file_path, output_file_path):
         """
